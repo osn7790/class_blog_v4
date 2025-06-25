@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.sql.Timestamp;
 
 
-@NoArgsConstructor// JPA 에서 엔티티는 기본 생성자가 필요
+@NoArgsConstructor// JPA 에서 엔티티는 기본 생성자가 필요하다
 @AllArgsConstructor
 @Builder
 @Data
