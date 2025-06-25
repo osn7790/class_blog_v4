@@ -1,5 +1,6 @@
 package com.tenco.blog.board;
 
+import com.tenco.blog._core.errors.exception.Exception403;
 import com.tenco.blog.user.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -27,7 +28,7 @@ public class BoardController {
     // 4. 수정 폼에 기존 데이터 뷰 바인딩 처리
 
 
-    @GetMapping("/board/{id}/update-form")
+    @GetMapping("/board/{id}/board-update")
     public String updateForm(@PathVariable(name = "id") Long boardId,
                              HttpServletRequest request, HttpSession session) {
 
@@ -53,7 +54,7 @@ public class BoardController {
 
 
         // 내부에서(스프링 컨테이너) 뷰 리졸브를 활용해서 머스테치 파일
-        return "board/update-form";
+        return "board/board-update";
     }
 
     // 게시글 수정 액션 요청 : 더티 체킹 활용
@@ -191,12 +192,15 @@ public class BoardController {
     }
 
 
+
     @GetMapping("/")
     public String index(HttpServletRequest request) {
+
+
         List<Board> boardList = boardRepository.findByAll();
         //2. 생각해볼 사항 - Board 엔티티에는 User 엔티티와 연관광계 중
         // 연관 관계 호출 확인
-        // boardList.get(0).getUser().getUsername();
+        boardList.get(0).getUser().getUsername();
         // 3.뷰에 데이터 전달
         request.setAttribute("boardList", boardList);
         return "index";
