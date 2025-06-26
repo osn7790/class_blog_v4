@@ -1,11 +1,13 @@
 package com.tenco.blog.board;
 
+import com.tenco.blog._core.errors.exception.Exception404;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,9 +18,13 @@ public class BoardRepository {
 
     // DI
     private final EntityManager em;
+    private static final Logger log = LoggerFactory.getLogger(BoardRepository.class);
+
 
     // 게시글 수정하기
     public Board updateById(Long id, BoardRequest.UpdateDTO reqDTO) {
+
+        log.info("게시글 수정 시작 - id : {}", id);
         // 더티 체킹
         Board board = findById(id);
         board.setTitle(reqDTO.getTitle());
@@ -40,15 +46,17 @@ public class BoardRepository {
         // 2 - JPQL (객체 지향 쿼리 언어 - 엔티티 객체를 대상으로 질의어)
         // 3 - 영속성 처리 (em)
         // JPQL 로 쿼리 작성
+        log.info("게시글 삭제 시작 - id : {}", id);
         String jpql = " DELETE FROM Board b WHERE b.id = :id";
         Query query = em.createQuery(jpql);
         query.setParameter("id", id);
 
         int deletedCount = query.executeUpdate(); // I, U, D
         if (deletedCount == 0) {
-            throw new IllegalArgumentException("삭제할 게시글이 없습니다.");
+            throw new Exception404("삭제할 게시글이 없습니다.");
 
         }
+        log.info("게시글 삭제 완료 - 삭제 행 수: {}", deletedCount);
     }
 
         @Transactional
@@ -61,7 +69,7 @@ public class BoardRepository {
             // 2. 엔티티 존재 여부 확인
 
             if(board == null) {
-                throw new IllegalArgumentException("삭제할 게시글이 없습니다.");
+                throw new Exception404("삭제할 게시글이 없습니다.");
             }
             // 3. 영속화 상태의 엔티티를 삭제 상태로 변경
             em.remove(board);
@@ -80,6 +88,7 @@ public class BoardRepository {
 
     @Transactional  // 잊지말고 꼭 해야함.
     public Board save(Board board){
+        log.info("게시글 저장 시작 - 제목 : {}, 작성자 : {}", board.getTitle(), board.getUser().getUsername());
         // 비영속 상태의 Board Object를 영속성 컨텍스트에 저장하면
         em.persist(board);
         // 이후 시점에는 사실 같은 메모리주소를 가리킨다.
@@ -91,6 +100,7 @@ public class BoardRepository {
      */
     public List<Board> findByAll() {
         // 조회 - JOPL 쿼리 선택
+        log.info("전체 게시글 조회 시작 ");
         String jqpl = " SELECT b FROM Board b ORDER By b.id DESC ";
         TypedQuery query = em.createQuery(jqpl, Board.class);
         List<Board> boardList = query.getResultList();
@@ -105,6 +115,7 @@ public class BoardRepository {
      */
     public Board findById(Long id) {
         // 조회 - PK 조회는 무조건 에티티 매니저에 메서드 활용이 이득이다.
+        log.info("게시글 단건 조회 시작");
         Board board = em.find(Board.class, id);
         return board;
     }

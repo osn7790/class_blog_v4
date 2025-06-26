@@ -5,9 +5,12 @@ import com.tenco.blog._core.errors.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 // 모든 컨트롤러에서 발생하는 예외 처리를 이 클래스에서 처리하겠다.
 // RunTimeException 발생하면 해당 파일로 예외 처리가 집중 됨
@@ -32,16 +35,28 @@ public class MyExceptionHandler {
         return "err/400";
     }
 
+//    @ExceptionHandler(Exception401.class)
+//    public String ex401(Exception401 e, HttpServletRequest request) {
+//
+//        log.warn("=== 401 UnAuthorized 에러 발생 ===");
+//        log.warn("요청 URL : {}", request.getRequestURL());
+//        log.warn("인증 오류 : {}", e.getMessage());
+//        log.warn("User-Agent: {}", request.getHeader("User-Agent"));
+//
+//        request.setAttribute("msg", e.getMessage());
+//        return "err/401";
+//    }
+
     @ExceptionHandler(Exception401.class)
-    public String ex401(Exception401 e, HttpServletRequest request) {
-
-        log.warn("=== 401 UnAuthorized 에러 발생 ===");
-        log.warn("요청 URL : {}", request.getRequestURL());
-        log.warn("인증 오류 : {}", e.getMessage());
-        log.warn("User-Agent: {}", request.getHeader("User-Agent"));
-
-        request.setAttribute("msg", e.getMessage());
-        return "err/401";
+    @ResponseBody // 데이터를 반환 함
+    public ResponseEntity<String> ex401ByDate(Exception401 e, HttpServletRequest request) {
+        // location.href = '/join-form'
+       // String script = "<script> alert('"+ e.getMessage() +"'); history.back(); </script>";
+        String script = "<script> alert('"+ e.getMessage() +"'); location.href = '/login-form'; </script>";
+        return ResponseEntity.
+                status(HttpStatus.UNAUTHORIZED)
+                .contentType(MediaType.TEXT_HTML)
+                .body(script);
     }
 
     @ExceptionHandler(Exception403.class)

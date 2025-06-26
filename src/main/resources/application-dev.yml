@@ -11,6 +11,8 @@ logging:
   level:
     root: INFO  # 모든 라이브러리는 INFO 이상만 출력
     com.tenco: DEBUG # 내 프로젝트는 DEBUG 이상 모두 출력
+    #com.tenco.blog: INFO
+    #com.tenco.user: WARN
 
 # spring 환경 설정
 spring:

@@ -1,16 +1,20 @@
 package com.tenco.blog.user;
 
 
+import com.tenco.blog._core.errors.exception.Exception400;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository // IoC 대상 + 싱글톤 패턴으로 관리 됨
 public class UserRepository {
 
+    private static final Logger log = LoggerFactory.getLogger(UserRepository.class);
     private final EntityManager em;
 
     // 사용자 정보 조회 (username, password)
@@ -23,6 +27,7 @@ public class UserRepository {
      */
     public User findByUsernameAndPassword(String username, String password) {
         // JPQL
+        // 필요하면 직접 예외 처리 설정
         try {
             String jpql = " SELECT u FROM User u " +
                 " WHERE u.username = :username AND u.password = :password";
@@ -51,6 +56,7 @@ public class UserRepository {
      */
     @Transactional
     public User save(User user) {
+        log.info("회원 정보 저장 시작");
         // 매개변수에 들어오는 user Object는 비영속화 된 상태이다.
         em.persist(user); // 영속성 컨텍스트에 user 객체를 관리하기 시작
         // 트랜잭션 커밋 시점에 실제 INSERT 쿼리를 실행한다.
@@ -59,6 +65,7 @@ public class UserRepository {
 
     // 사용자명 중복 체크용 조회 기능
     public User findByUsername(String username) {
+        log.info("중복 사용자 이름 조회");
         // where username = ?
         // select --> 네이티브 쿼리, JPQL
 
@@ -78,9 +85,10 @@ public class UserRepository {
     }
 
     public User findById(Long id) {
+        log.info("사용자 조회 - ID : {}", id);
         User user = em.find(User.class, id);
         if(user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다.");
+            throw new Exception400("사용자를 찾을 수 없습니다.");
 
         }
         return user;
@@ -88,6 +96,7 @@ public class UserRepository {
 
     @Transactional
     public User updateById(Long id, UserRequest.UpdateDTO reqDTO) {
+        log.info("회원 정보 수정 - 시작 ID : {} ", id);
         // 조회, 객체의 상태값 변경, 트랜처리 --> update
         User user = findById(id);
         // 객체의 상태값을 행위를 통해서 변경
